@@ -17,9 +17,9 @@ export const GlobalProvider = ({ children }) => {
   async function getTransactions() {
     try {
       const res = await axios.get('/api/v1/transactions')
-      
+
       dispatch({
-        type: 'GET_TRANSACTIONS',
+        type: 'GET_TRANSACTION',
         payload: res.data.data
       })
     } catch (err) {
@@ -30,18 +30,44 @@ export const GlobalProvider = ({ children }) => {
     }
   }
 
-  function deleteTransaction(id) {
-    dispatch({
-      type: 'DELETE_TRANSACTION',
-      payload: id
-    })
+  async function deleteTransaction(id) {
+    try {
+      await axios
+        .delete(`/api/v1/transactions/${id}`)
+        .then(
+          dispatch({
+            type: 'DELETE_TRANSACTION',
+            payload: id
+          })
+        )
+    } catch (err) {
+      dispatch({
+        type: 'TRANSACTION_ERROR',
+        payload: err.error
+      })
+    }
   }
 
-  function addTransaction(transaction) {
-    dispatch({
-      type: 'ADD_TRANSACTION',
-      payload: transaction
-    })
+  async function addTransaction(transaction) {
+    const config = {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+
+    try {
+      const res = await axios.post('/api/v1/transactions', transaction, config)
+
+      dispatch({
+        type: 'ADD_TRANSACTION',
+        payload: res.data.data
+      })
+    } catch (err) {
+      dispatch({
+        type: 'TRANSACTION_ERROR',
+        payload: err.responce.data.error
+      })
+    }
   }
 
   return (
